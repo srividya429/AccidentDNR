@@ -46,6 +46,7 @@
                     android:textSize="15sp"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/vehicle"
+                    android:drawableStart="@drawable/vehicle"
                     android:drawableTint="@color/colorAccent"
                     android:hint="Vehicle Number"
                     android:drawablePadding="5dp"
