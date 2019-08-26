@@ -1,4 +1,4 @@
-package com.example.admin.accidentdnr;
+package com.cyient.iot.ambulance;
 
 import org.junit.Test;
 

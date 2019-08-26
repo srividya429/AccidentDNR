@@ -39,6 +39,7 @@
                     android:id="@+id/mEdtName"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
                     android:drawableLeft="@drawable/user"
                     android:drawablePadding="5dp"
                     android:drawableTint="@color/colorAccent"
@@ -63,6 +64,9 @@
                     android:hint="Email Address"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
+                    android:enabled="false"
+                    android:clickable="false"
+                    android:focusable="false"
                     android:textSize="15sp" />
             </android.support.design.widget.TextInputLayout>
 
@@ -78,8 +82,9 @@
                     android:drawableLeft="@drawable/mobile_number"
                     android:drawablePadding="5dp"
                     android:drawableTint="@color/colorAccent"
-                    android:hint="Mobile Number"
+                    android:hint="Vehicle SIM Number"
                     android:inputType="number"
+                    android:maxLength="10"
                     android:maxLines="1"
                     android:textSize="15sp" />
             </android.support.design.widget.TextInputLayout>
@@ -93,54 +98,72 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
                     android:drawableLeft="@drawable/vehicle"
                     android:drawablePadding="5dp"
                     android:drawableTint="@color/colorAccent"
                     android:hint="Vehicle Number"
                     android:inputType="text"
-                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+                    android:maxLength="10"
                     android:maxLines="1"
                     android:textSize="15sp" />
             </android.support.design.widget.TextInputLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="5dp">
+                android:orientation="horizontal">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Ambulance Type"/>
-                <RadioButton
-                    android:id="@+id/mRadBtnGovern"
+                    android:layout_gravity="center_vertical"
+                    android:text="Ambulance Type : "
+                    android:textColor="@android:color/black" />
+
+                <RadioGroup
+                    android:id="@+id/mRadGrovehicleType"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
-                    android:checked="true"
-                    android:text="Government"/>
-                <RadioButton
-                    android:id="@+id/mRadBtnPrivate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="10sp"
-                    android:text="Private"/>
+                    android:layout_weight="2"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/mRadBtnGovern"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:checked="true"
+                        android:text="Government"
+                        android:textSize="10sp" />
+
+                    <RadioButton
+                        android:id="@+id/mRadBtnPrivate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Private"
+                        android:textSize="10sp" />
+                </RadioGroup>
             </LinearLayout>
 
             <android.support.design.widget.TextInputLayout
+                android:id="@+id/mTxtIptLytServiceProvider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:visibility="gone">
 
                 <EditText
                     android:id="@+id/mEdtServiceProvider"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
                     android:drawableLeft="@drawable/service_provider"
                     android:drawablePadding="5dp"
                     android:drawableTint="@color/colorAccent"
                     android:hint="Service provider"
-                    android:inputType="textPassword"
+                    android:inputType="text"
                     android:maxLines="1"
                     android:textSize="15sp" />
             </android.support.design.widget.TextInputLayout>
@@ -183,16 +206,16 @@
 
             <Button
                 android:id="@+id/mBtnRegister"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_gravity="center"
+                android:layout_margin="10dp"
                 android:background="@color/colorAccent"
                 android:gravity="center"
                 android:text="Register"
                 android:textAllCaps="false"
                 android:textColor="#fff"
                 android:textSize="15sp" />
-
 
         </LinearLayout>
     </RelativeLayout>

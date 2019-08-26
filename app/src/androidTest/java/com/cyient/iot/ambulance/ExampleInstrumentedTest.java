@@ -1,4 +1,4 @@
-package com.example.admin.accidentdnr;
+package com.cyient.iot.ambulance;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
