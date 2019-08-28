@@ -1,5 +1,6 @@
 package com.cyient.iot.ambulance;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,16 +34,32 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ActionActivity extends AppCompatActivity implements View.OnClickListener {
+
+public class ActionActivity extends AppCompatActivity implements
+        View.OnClickListener,
+        OnMapReadyCallback,
+        GoogleMap.OnMyLocationButtonClickListener,
+        ActivityCompat.OnRequestPermissionsResultCallback,
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener,
+        OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener {
+
+    /**
+     * Request code for location permission request.
+     *
+     * @see #onRequestPermissionsResult(int, String[], int[])
+     */
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private String mVehicleNo = "";
     private MapView mapView = null;
@@ -58,17 +76,28 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
     private SharedPreferences.Editor mSharedPreferences = null;
     private Button mUpdateStatusBtn = null;
 
+    private static final LatLng BRISBANE = new LatLng(-27.47093, 153.0235);
+    private static final LatLng MELBOURNE = new LatLng(-37.81319, 144.96298);
+    private static final LatLng SYDNEY = new LatLng(-33.87365, 151.20689);
+    private static final LatLng ADELAIDE = new LatLng(-34.92873, 138.59995);
+    private static final LatLng PERTH = new LatLng(-31.952854, 115.857342);
+
+    /**
+     * Keeps track of the selected marker.
+     */
+    private Marker mSelectedMarker;
+
     @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action);
 
-        MapsInitializer.initialize(getApplicationContext());
+        // MapsInitializer.initialize(getApplicationContext());
 
         progressBar = (ProgressBar) findViewById(R.id.progressbar);
-        mapView = (MapView) findViewById(R.id.map);
-        mapView.onCreate(savedInstanceState);
+        // mapView = (MapView) findViewById(R.id.map);
+        // mapView.onCreate(savedInstanceState);
 
         SharedPreferences preferences = getSharedPreferences("DnrPrefsFile", MODE_PRIVATE);
         mSharedPreferences = preferences.edit();
@@ -77,17 +106,25 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     private void initViews() {
-        mLatitude1 = 17.418665;
-        mLongitude1 = 78.337568;
+        //mLatitude1 = 17.418665;
+        //mLongitude1 = 78.337568;
+        mLatitude1 = -37.799802;
+        mLongitude1 = 144.9565125;
         mNotificationBtn = (Button) findViewById(R.id.notificationBtn);
         mExitServiceBtn = (Button) findViewById(R.id.exitServiceBtn);
         mUpdateStatusBtn = (Button) findViewById(R.id.updateStatusBtn);
         serviceIntent = new Intent(ActionActivity.this, MyIntentService.class);
-        if (mapView != null) {
+        /*if (mapView != null) {
             mapView.getMapAsync(new OnMapReadyCallback() {
                 @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    googleMap.addMarker(new MarkerOptions()
+                public void onMapReady(GoogleMap mGoogleMap) {
+                    googleMap = mGoogleMap;
+
+                    // Add a marker in Sydney, Australia, and move the camera.
+                    LatLng sydney = new LatLng(-34, 151);
+                    googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                    *//*googleMap.addMarker(new MarkerOptions()
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_flag))
                             .anchor(0.0f, 1.0f)
                             .position(new LatLng(mLatitude1, mLongitude1)));
@@ -105,10 +142,14 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
                     int padding = 0;
                     // Updates the location and zoom of the MapView
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                    googleMap.moveCamera(cameraUpdate);
+                    googleMap.moveCamera(cameraUpdate);*//*
                 }
             });
-        }
+        }*/
+        SupportMapFragment mapFragment =
+                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        //mapFragment.getMapAsync(this);
+        new OnMapAndViewReadyListener(mapFragment, this);
         new GetArduinoDetails().execute();
 
         mNotificationBtn.setOnClickListener(this);
@@ -195,6 +236,107 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    @Override
+    public void onMapReady(GoogleMap mGoogleMap) {
+        googleMap = mGoogleMap;
+
+        //googleMap.setOnMyLocationButtonClickListener(this);
+        //googleMap.setOnMyLocationClickListener(this);
+        //enableMyLocation();
+
+        //mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        // Hide the zoom controls.
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+
+        // Add lots of markers to the map.
+        addMarkersToMap();
+
+        // Set listener for marker click event.  See the bottom of this class for its behavior.
+        googleMap.setOnMarkerClickListener(this);
+
+        // Set listener for map click event.  See the bottom of this class for its behavior.
+        googleMap.setOnMapClickListener(this);
+
+        // Override the default content description on the view, for accessibility mode.
+        // Ideally this string would be localized.
+        googleMap.setContentDescription("Demo showing how to close the info window when the currently"
+                + " selected marker is re-tapped.");
+
+        LatLngBounds bounds = new LatLngBounds.Builder()
+                .include(MELBOURNE)
+                .build();
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+    }
+
+    private void enableMyLocation() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission to access the location is missing.
+            PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION, true);
+        } else if (googleMap != null) {
+            // Access to the location has been granted to the app.
+            googleMap.setMyLocationEnabled(true);
+        }
+    }
+
+    private void addMarkersToMap() {
+        googleMap.addMarker(new MarkerOptions()
+                .position(BRISBANE)
+                .title("Brisbane")
+                .snippet("Population: 2,074,200"));
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(SYDNEY)
+                .title("Sydney")
+                .snippet("Population: 4,627,300"));
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(MELBOURNE)
+                .title("Melbourne")
+                .snippet("Population: 4,137,400"));
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(PERTH)
+                .title("Perth")
+                .snippet("Population: 1,738,800"));
+
+        googleMap.addMarker(new MarkerOptions()
+                .position(ADELAIDE)
+                .title("Adelaide")
+                .snippet("Population: 1,213,000"));
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        mSelectedMarker = null;
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        // The user has re-tapped on the marker which was already showing an info window.
+        if (marker.equals(mSelectedMarker)) {
+            // The showing info window has already been closed - that's the first thing to happen
+            // when any marker is clicked.
+            // Return true to indicate we have consumed the event and that we do not want the
+            // the default behavior to occur (which is for the camera to move such that the
+            // marker is centered and for the marker's info window to open, if it has one).
+            mSelectedMarker = null;
+            return true;
+        }
+
+        mSelectedMarker = marker;
+
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur.
+        return false;
+    }
+
     private class GetArduinoDetails extends AsyncTask<String, Integer, Integer> {
 
         private double latitude2;
@@ -217,7 +359,7 @@ public class ActionActivity extends AppCompatActivity implements View.OnClickLis
                 if (credentialsProvider != null) {
                     AmazonDynamoDBClient ddbClient = new AmazonDynamoDBClient(credentialsProvider);
 
-                    ddbClient.setRegion(Region.getRegion(Regions.US_WEST_2));
+                    ddbClient.setRegion(Region.getRegion(Regions.US_EAST_2));
                     DynamoDBMapper dynamoDBMapper = managerClass.initDynamoClient(credentialsProvider);
 
                     System.out.println("FindBicyclesOfSpecificTypeWithMultipleThreads: Scan Accident vehicles With Multiple Threads.");

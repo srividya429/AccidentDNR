@@ -30,7 +30,7 @@ public class ManagerClass {
     public CognitoCachingCredentialsProvider getCredentials(Context context) {
 
         // Initialize the Amazon Cognito credentials provider
-        credentialsProvider = new CognitoCachingCredentialsProvider(context, "us-west-2:0e46bf82-ca4b-4a46-a417-c28683410655", Regions.US_WEST_2);
+        credentialsProvider = new CognitoCachingCredentialsProvider(context, "us-east-2:263761a1-38eb-4848-9362-8dfc35979f6b", Regions.US_EAST_2);
         return credentialsProvider;
     }
 
@@ -38,7 +38,7 @@ public class ManagerClass {
         if (credentialsProvider == null) {
             getCredentials(context);
             s3Client = new AmazonS3Client(credentialsProvider);
-            s3Client.setRegion(Region.getRegion(Regions.US_WEST_2));
+            s3Client.setRegion(Region.getRegion(Regions.US_EAST_2));
         }
         return s3Client;
     }
@@ -56,7 +56,7 @@ public class ManagerClass {
 
         if (dynamoDBClient == null) {
             dynamoDBClient = new AmazonDynamoDBClient(credentialsProvider);
-            dynamoDBClient.setRegion(Region.getRegion(Regions.US_WEST_2));
+            dynamoDBClient.setRegion(Region.getRegion(Regions.US_EAST_2));
             dynamoDBMapper = new DynamoDBMapper(dynamoDBClient);
         }
 
